@@ -1,0 +1,42 @@
+pipeline{
+    agent any
+    environment {
+        IMAGE='badhon58/frontend'
+        TAG="${BUILD_NUMBER}"
+    }
+    stages {
+        stage("Check Out"){
+            steps{
+               git branch: 'main', 
+               credentialsId: 'github-pat', 
+               url: 'https://github.com/Badhon58/NextJs_language.git'
+            }
+        }
+        stage("Build"){
+            steps{
+               sh 'docker build -t "$IMAGE:$TAG" -t "$IMAGE:latest" .'
+            }
+        }
+        stage("Push"){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'DockerHubCred', passwordVariable: 'DOCKERHUB_PWD', usernameVariable: 'DOCKERHUB_USER')]) {
+                sh 'echo "$DOCKERHUB_PWD" | docker login -u "$DOCKERHUB_USER" --password-stdin'
+                sh 'docker push "$IMAGE:$TAG"'
+                sh 'docker push "$IMAGE:latest"'
+                }
+            }
+        }
+        stage("Deploy"){
+            steps{
+               sh 'docker pull "$IMAGE:$TAG"'
+               sh 'docker rm -f frontend || true'
+               sh 'docker run -d --name frontend -p 3000:3000 "$IMAGE:$TAG"'
+            }
+        }
+        stage("Test"){
+            steps{
+                echo "This is Test Step"
+            }
+        }
+    }
+}
