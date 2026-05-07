@@ -21,3 +21,6 @@
 ## Trunk-Based CI/CD : MultiBranch Flow
 
 ![Trunk-Based CI/CD : MultiBranch Flow](./1.png)
+
+
+- SCA (Software Composition Analysis) = Dependency scanning, 
